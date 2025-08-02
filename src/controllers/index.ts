@@ -1,3 +1,3 @@
 import * as Health from "./health";
-
-export { Health };
+import * as Post from "./post";
+export { Health,Post };
