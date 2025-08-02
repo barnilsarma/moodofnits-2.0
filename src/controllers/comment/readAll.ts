@@ -1,0 +1,1 @@
+//to read all comments of a post

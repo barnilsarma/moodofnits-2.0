@@ -1,0 +1,1 @@
+//to read a candidate's details
