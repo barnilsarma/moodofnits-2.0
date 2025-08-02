@@ -1,6 +1,10 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+//GS
+//VP
+//GSC
+//GSS
+//GST
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,6 +14,92 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum POSITION {
+  GS
+  VP
+  GSC
+  GSS
+  GST
+}
+
+enum POST {
+  PHOTO
+  VIDEO
+  TEXT
+  POLL
+}
+
 model User {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  username String    @unique
+  email    String    @unique
+  name     String
+  votes    String    @default("00000")
+  Post     Post[]
+  Comment  Comment[]
+}
+
+model Post {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  type        POST
+  question    String?
+  options     Option[]
+  title       String
+  asset       String?
+  description String
+  likes       BigInt    @default(0)
+  authorId    String    @db.ObjectId
+  author      User      @relation(fields: [authorId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Comment     Comment[]
+}
+
+model Option {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  postId    String   @db.ObjectId
+  post      Post     @relation(fields: [postId], references: [id])
+  votes     BigInt   @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  postId    String   @db.ObjectId
+  post      Post     @relation(fields: [postId], references: [id])
+  authorId  String   @db.ObjectId
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  likes     BigInt   @default(0)
+}
+
+model ExitPoll {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  positions Position[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Position {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  name       POSITION
+  candidates Candidate[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  ExitPoll   ExitPoll?   @relation(fields: [exitPollId], references: [id])
+  exitPollId String?     @db.ObjectId
+}
+
+model Candidate {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  designation String
+  description String?
+  positionId  String   @db.ObjectId
+  position    Position @relation(fields: [positionId], references: [id])
+  votes       BigInt   @default(0)
 }
