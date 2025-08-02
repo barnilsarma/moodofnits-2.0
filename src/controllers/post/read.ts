@@ -14,7 +14,12 @@ const Read: Interfaces.Controllers.Async = async (req, res) => {
                 asset: true,
                 description: true,
                 likes: true,
-                authorId: true,
+                author: {
+                    select:{
+                        id: true,
+                        username:true
+                    }
+                },
                 createdAt: true, 
                 updatedAt: true,
                 Comment:{
@@ -31,13 +36,13 @@ const Read: Interfaces.Controllers.Async = async (req, res) => {
             }
         });
         return res.json({
-            msg: "Post created successfully",
+            msg: "Post fetched successfully",
             data: action
         });
     }
     catch (error) {
         return res.json({
-            msg:"Problem in creating post",
+            msg:"Problem in fetching post",
             data: error
         });
     }
