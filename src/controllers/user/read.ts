@@ -2,9 +2,9 @@ import * as Utils from "src/utils";
 import * as Interfaces from "src/interfaces";
 import { prisma } from "src/utils";
 
-const createComment: Interfaces.Controllers.Async = async (req, res, next) => {
+const readUser: Interfaces.Controllers.Async = async (req, res, next) => {
   try {
-    const authorizationHeader: string | undefined = req.headers.authorization;
+    const authorizationHeader: string | undefined = req?.headers?.authorization;
     if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
       return next(Utils.Response.error("Authorization token is required", 401));
     }
@@ -22,34 +22,23 @@ const createComment: Interfaces.Controllers.Async = async (req, res, next) => {
 
     const uid = decodedToken.uid;
 
-    const user = await prisma.user.findUnique({ where: { firebaseId: uid } });
+    const user = await prisma.user.findUnique({
+      where: { firebaseId: uid },
+      include: {
+        Post: true,
+        Comment: true,
+      },
+    });
+
     if (!user) {
       return next(Utils.Response.error("User not found", 404));
     }
 
-    const { postId, content, parentId } = req.body;
-    if (!postId || !content) {
-      return next(Utils.Response.error("Missing postId or content", 400));
-    }
-
-    const comment = await prisma.comment.create({
-      data: {
-        content,
-        postId,
-        authorId: user.id,
-        parentId,
-      },
-      include: {
-        author: true,
-        replies: true,
-      },
-    });
-
-    return res.json(Utils.Response.success(comment, 201));
+    return res.json(Utils.Response.success(user, 200));
   } catch (err) {
-    console.error("Error creating comment:", err);
+    console.error("Error fetching user:", err);
     return next(Utils.Response.error((err as Error).message, 500));
   }
 };
 
-export default createComment;
+export default readUser;

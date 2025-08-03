@@ -30,13 +30,14 @@ enum POST {
 }
 
 model User {
-  id       String    @id @default(auto()) @map("_id") @db.ObjectId
-  username String    @unique
-  email    String    @unique
-  name     String
-  votes    String    @default("00000")
-  Post     Post[]
-  Comment  Comment[]
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  username   String    @unique
+  email      String    @unique
+  name       String
+  votes      String    @default("00000")
+  firebaseId String?   @unique
+  Post       Post[]
+  Comment    Comment[]
 }
 
 model Post {
@@ -66,18 +67,18 @@ model Option {
 }
 
 model Comment {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
   content   String
-  postId    String   @db.ObjectId
-  post      Post     @relation(fields: [postId], references: [id])
-  authorId  String   @db.ObjectId
-  author    User     @relation(fields: [authorId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  likes     BigInt   @default(0)
-  parentId    String?    @db.ObjectId
-  parent      Comment?   @relation("CommentToReplies", fields: [parentId], references: [id],onDelete: NoAction, onUpdate: NoAction)
-  replies     Comment[]  @relation("CommentToReplies")
+  postId    String    @db.ObjectId
+  post      Post      @relation(fields: [postId], references: [id])
+  authorId  String    @db.ObjectId
+  author    User      @relation(fields: [authorId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  likes     BigInt    @default(0)
+  parentId  String?   @db.ObjectId
+  parent    Comment?  @relation("CommentToReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Comment[] @relation("CommentToReplies")
 }
 
 model ExitPoll {

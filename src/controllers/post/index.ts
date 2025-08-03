@@ -4,4 +4,4 @@ import ReadAll from "./readAll";
 import Update from "./update";
 import Delete from "./delete";
 
-export {Create,Read,ReadAll,Update,Delete};
+export { Create, Read, ReadAll, Update, Delete };

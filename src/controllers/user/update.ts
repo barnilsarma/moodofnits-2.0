@@ -2,9 +2,13 @@ import * as Utils from "src/utils";
 import * as Interfaces from "src/interfaces";
 import { prisma } from "src/utils";
 
-const createComment: Interfaces.Controllers.Async = async (req, res, next) => {
+const updateUserVotes: Interfaces.Controllers.Async = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const authorizationHeader: string | undefined = req.headers.authorization;
+    const authorizationHeader: string | undefined = req?.headers?.authorization;
     if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
       return next(Utils.Response.error("Authorization token is required", 401));
     }
@@ -22,34 +26,34 @@ const createComment: Interfaces.Controllers.Async = async (req, res, next) => {
 
     const uid = decodedToken.uid;
 
-    const user = await prisma.user.findUnique({ where: { firebaseId: uid } });
+    const user = await prisma.user.findUnique({
+      where: { firebaseId: uid },
+    });
+
     if (!user) {
       return next(Utils.Response.error("User not found", 404));
     }
 
-    const { postId, content, parentId } = req.body;
-    if (!postId || !content) {
-      return next(Utils.Response.error("Missing postId or content", 400));
+    const { voteIndex } = req.body;
+    if (voteIndex === undefined || voteIndex < 0 || voteIndex > 4) {
+      return next(
+        Utils.Response.error("Invalid vote index (must be 0 to 4)", 400)
+      );
     }
+    const updatedVotes = "00000".split("");
+    updatedVotes[voteIndex] = "1";
+    const votesString = updatedVotes.join("");
 
-    const comment = await prisma.comment.create({
-      data: {
-        content,
-        postId,
-        authorId: user.id,
-        parentId,
-      },
-      include: {
-        author: true,
-        replies: true,
-      },
+    const updatedUser = await prisma.user.update({
+      where: { firebaseId: uid },
+      data: { votes: votesString },
     });
 
-    return res.json(Utils.Response.success(comment, 201));
+    return res.json(Utils.Response.success(updatedUser, 200));
   } catch (err) {
-    console.error("Error creating comment:", err);
+    console.error("Error updating user vote:", err);
     return next(Utils.Response.error((err as Error).message, 500));
   }
 };
 
-export default createComment;
+export default updateUserVotes;

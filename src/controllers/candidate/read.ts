@@ -21,3 +21,4 @@ const Read: Interfaces.Controllers.Async = async (req, res) => {
 };
 
 export default Read;
+
