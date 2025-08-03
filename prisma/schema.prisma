@@ -38,6 +38,7 @@ model User {
   firebaseId String?   @unique
   Post       Post[]
   Comment    Comment[]
+  likes      Like[]
 }
 
 model Post {
@@ -54,6 +55,18 @@ model Post {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   Comment     Comment[]
+  likedBy     Like[]
+}
+
+model Like {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId String    @db.ObjectId
+  postId String    @db.ObjectId
+
+  user   User      @relation(fields: [userId], references: [id])
+  post   Post      @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId], name: "userPostUnique") 
 }
 
 model Option {
