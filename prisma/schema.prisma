@@ -59,14 +59,14 @@ model Post {
 }
 
 model Like {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId String    @db.ObjectId
-  postId String    @db.ObjectId
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  postId String @db.ObjectId
 
-  user   User      @relation(fields: [userId], references: [id])
-  post   Post      @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
 
-  @@unique([userId, postId], name: "userPostUnique") 
+  @@unique([userId, postId], name: "userPostUnique")
 }
 
 model Option {
@@ -96,6 +96,7 @@ model Comment {
 
 model ExitPoll {
   id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
   positions Position[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -115,6 +116,7 @@ model Candidate {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   designation String
+  photo       String?
   description String?
   positionId  String   @db.ObjectId
   position    Position @relation(fields: [positionId], references: [id])

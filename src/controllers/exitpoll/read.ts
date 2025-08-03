@@ -1,24 +1,32 @@
-//controller to read
 import * as Interfaces from "../../interfaces";
-import { prisma } from "../../utils/index";
+import { prisma } from "../../utils";
 
-const Read: Interfaces.Controllers.Async = async (req, res) => {
+const ReadAll: Interfaces.Controllers.Async = async (_req, res, next) => {
   try {
-    const poll = await prisma.exitPoll.findUnique({
-      where: { id: req.params.id },
+    const exitPolls = await prisma.exitPoll.findMany({
       include: {
-        positions: true,
+        positions: {
+          include: {
+            candidates: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
       },
     });
 
-    if (!poll) {
-      return res.status(404).json({ msg: "Exit poll not found" });
-    }
-
-    return res.json({ data: poll });
+    return res.status(200).json({
+      msg: "Exit polls fetched successfully",
+      data: exitPolls,
+    });
   } catch (error) {
-    return res.status(500).json({ msg: "Error reading exit poll", error });
+    console.error("Error fetching exit polls:", error);
+    return next({
+      status: 500,
+      message: "Internal server error",
+    });
   }
 };
 
-export default Read;
+export default ReadAll;

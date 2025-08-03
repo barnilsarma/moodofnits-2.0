@@ -1,15 +1,33 @@
-//controller for exitpoll
 import * as Interfaces from "../../interfaces";
-import { prisma } from "../../utils/index";
+import { prisma } from "../../utils";
 
-const Create: Interfaces.Controllers.Async = async (req, res) => {
+const Create: Interfaces.Controllers.Async = async (req, res, next) => {
   try {
-    const { positionIds } = req.body;
+    const { name, positionName } = req.body;
+
+    if (!name || !positionName) {
+      return next({
+        status: 400,
+        message: "Both 'name' and 'positionName' are required",
+      });
+    }
+
+    const validPositionNames = ["GS", "VP", "GSC", "GSS", "GST"];
+    if (!validPositionNames.includes(positionName)) {
+      return next({
+        status: 400,
+        message:
+          "Invalid 'positionName'. Must be one of: GS, VP, GSC, GSS, GST",
+      });
+    }
 
     const exitPoll = await prisma.exitPoll.create({
       data: {
+        name,
         positions: {
-          connect: positionIds.map((id: string) => ({ id })),
+          create: {
+            name: positionName,
+          },
         },
       },
       include: {
@@ -17,14 +35,15 @@ const Create: Interfaces.Controllers.Async = async (req, res) => {
       },
     });
 
-    return res.json({
-      msg: "Exit poll created successfully",
+    return res.status(201).json({
+      msg: "Exit poll created with one position",
       data: exitPoll,
     });
   } catch (error) {
-    return res.status(500).json({
-      msg: "Error creating exit poll",
-      error,
+    console.error("Error creating exit poll:", error);
+    return next({
+      status: 500,
+      message: "Internal server error",
     });
   }
 };

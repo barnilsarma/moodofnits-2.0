@@ -1,11 +1,4 @@
 import Create from "./create";
-import Read from "./read";
-import Update from "./update";
-import Delete from "./delete";
+import ReadAll from "./read";
 
-export default {
-  Create,
-  Read,
-  Update,
-  Delete,
-};
+export { Create, ReadAll };

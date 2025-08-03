@@ -4,13 +4,14 @@ import { prisma } from "../../utils/index";
 const Create: Interfaces.Controllers.Async = async (req, res) => {
   try {
     const { name, designation, description, positionId } = req.body;
-
+    const photoUrl = req.file && (req.file as Express.MulterS3.File).location;
     const candidate = await prisma.candidate.create({
       data: {
         name,
         designation,
         description,
         positionId,
+        photo: photoUrl || null,
       },
     });
 
