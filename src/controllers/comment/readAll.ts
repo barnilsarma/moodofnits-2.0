@@ -1,7 +1,6 @@
-//to read all comments of a postimport * as Utils from "src/utils";
+import * as Utils from "src/utils";
 import * as Interfaces from "src/interfaces";
 import { prisma } from "src/utils";
-import * as Utils from "src/utils";
 
 const readAllComments: Interfaces.Controllers.Async = async (
   req,
@@ -10,21 +9,34 @@ const readAllComments: Interfaces.Controllers.Async = async (
 ) => {
   try {
     const { postId } = req.params;
-    const comments = await prisma.comment.findMany({
+
+    const allComments = await prisma.comment.findMany({
       where: { postId },
       orderBy: { createdAt: "asc" },
       include: {
         author: true,
-        replies: {
-          include: {
-            author: true,
-          },
-          orderBy: { createdAt: "asc" },
-        },
       },
     });
 
-    return res.json(Utils.Response.success(comments, 200));
+    const commentMap = new Map();
+    const rootComments: any[] = [];
+
+    allComments.forEach((comment) => {
+      commentMap.set(comment.id, { ...comment, replies: [] });
+    });
+
+    allComments.forEach((comment) => {
+      if (comment.parentId) {
+        const parent = commentMap.get(comment.parentId);
+        if (parent) {
+          parent.replies.push(commentMap.get(comment.id));
+        }
+      } else {
+        rootComments.push(commentMap.get(comment.id));
+      }
+    });
+
+    return res.json(Utils.Response.success(rootComments, 200));
   } catch (err) {
     console.error("Error reading comments:", err);
     return next(Utils.Response.error((err as Error).message, 500));
