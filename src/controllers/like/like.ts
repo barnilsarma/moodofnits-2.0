@@ -22,7 +22,7 @@ const likePost: Interfaces.Controllers.Async = async (req, res, next) => {
       return next(Utils.Response.error("User not found", 404));
     }
 
-    const { postId } = req.body;
+    const { postId } = req.params;
 
     if (!postId) {
       return next(Utils.Response.error("Post ID is required", 400));
