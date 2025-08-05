@@ -28,7 +28,7 @@ const getAllPosts: Interfaces.Controllers.Async = async (req, res, next) => {
       orderBy: { createdAt: "desc" },
       include: {
         author: {
-          select: { id: true, name: true },
+          select: { id: true, username: true },
         },
         likedBy: currentUserId
           ? {
@@ -47,7 +47,7 @@ const getAllPosts: Interfaces.Controllers.Async = async (req, res, next) => {
       createdAt: post.createdAt,
       author: {
         id: post.author.id,
-        name: post.author.name,
+        username: post.author.username,
       },
       likedByCurrentUser: !!(currentUserId && post.likedBy.length > 0),
     }));
