@@ -49,7 +49,7 @@ model Post {
   title       String
   asset       String?
   description String
-  likes       BigInt    @default(0)
+  likes       Int    @default(0)
   authorId    String    @db.ObjectId
   author      User      @relation(fields: [authorId], references: [id])
   createdAt   DateTime  @default(now())
@@ -74,7 +74,7 @@ model Option {
   content   String
   postId    String   @db.ObjectId
   post      Post     @relation(fields: [postId], references: [id])
-  votes     BigInt   @default(0)
+  votes     Int   @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -120,5 +120,5 @@ model Candidate {
   description String?
   positionId  String   @db.ObjectId
   position    Position @relation(fields: [positionId], references: [id])
-  votes       BigInt   @default(0)
+  votes       Int   @default(0)
 }
