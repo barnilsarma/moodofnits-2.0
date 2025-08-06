@@ -4,6 +4,7 @@ const ReadAll: Interfaces.Controllers.Async = async (_req, res) => {
   try {
     const action = await prisma.position.findMany({
       select: {
+        id: true,
         name: true,
         candidates: true,
         createdAt: true,

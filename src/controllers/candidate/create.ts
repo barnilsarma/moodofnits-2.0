@@ -5,6 +5,7 @@ const Create: Interfaces.Controllers.Async = async (req, res) => {
   try {
     const { name, designation, description, positionId } = req.body;
     const photoUrl = req.file && (req.file as Express.MulterS3.File).location;
+
     const candidate = await prisma.candidate.create({
       data: {
         name,
@@ -20,9 +21,10 @@ const Create: Interfaces.Controllers.Async = async (req, res) => {
       data: candidate,
     });
   } catch (error) {
+    console.error("Create candidate error:", error); // helpful for debugging
     return res.status(500).json({
-      msg: "Problem in creating candidate",
-      error,
+      msg: error,
+      error: error instanceof Error ? error.message : error,
     });
   }
 };
