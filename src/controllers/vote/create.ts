@@ -30,8 +30,8 @@ const voteSingle: Interfaces.Controllers.Async = async (req, res, next) => {
       return next(Utils.Response.error("Invalid token", 401));
     }
 
-    const { candidateId, exitPollId } = req.body;
-    if (!candidateId || !exitPollId) {
+    const { candidateId } = req.body;
+    if (!candidateId) {
       return next(
         Utils.Response.error("Missing candidateId or exitPollId", 400)
       );
@@ -50,7 +50,7 @@ const voteSingle: Interfaces.Controllers.Async = async (req, res, next) => {
       include: { position: true },
     });
 
-    if (!candidate || candidate.position.exitPollId !== exitPollId) {
+    if (!candidate) {
       return next(
         Utils.Response.error("Invalid candidate or mismatched poll", 400)
       );

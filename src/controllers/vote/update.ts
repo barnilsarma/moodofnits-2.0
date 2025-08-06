@@ -30,11 +30,9 @@ const updateVote: Interfaces.Controllers.Async = async (req, res, next) => {
       return next(Utils.Response.error("Invalid token", 401));
     }
 
-    const { candidateId, exitPollId } = req.body;
-    if (!candidateId || !exitPollId) {
-      return next(
-        Utils.Response.error("Missing candidateId or exitPollId", 400)
-      );
+    const { candidateId } = req.body;
+    if (!candidateId) {
+      return next(Utils.Response.error("Missing candidateId", 400));
     }
 
     const user = await prisma.user.findUnique({
@@ -50,57 +48,63 @@ const updateVote: Interfaces.Controllers.Async = async (req, res, next) => {
       include: { position: true },
     });
 
-    if (!newCandidate || newCandidate.position.exitPollId !== exitPollId) {
-      return next(
-        Utils.Response.error("Invalid candidate or mismatched poll", 400)
-      );
+    if (!newCandidate) {
+      return next(Utils.Response.error("Invalid candidate", 400));
     }
 
     const positionKey = newCandidate.position.name;
     const idx = positionIndex(positionKey);
 
-    // Step 1: Find previous vote (if any) for this position
-    const positionCandidates = await prisma.candidate.findMany({
-      where: {
-        positionId: newCandidate.positionId,
-      },
-    });
+    // If already voted for this candidate (same candidate, same position), return early
+    const alreadyVoted = user.votes[idx] === "1";
+    if (alreadyVoted) {
+      // Check if the current candidate is the one they already voted for
+      const candidates = await prisma.candidate.findMany({
+        where: { positionId: newCandidate.positionId },
+      });
 
-    for (const candidate of positionCandidates) {
-      if (candidate.id !== newCandidate.id) {
-        // Check if this candidate was previously voted by the user (based on `votes` string)
-        if (user.votes[idx] === "1") {
-          // We assume only one candidate could have had that vote
+      for (const candidate of candidates) {
+        if (candidate.id !== newCandidate.id) {
+          // Assuming one vote per position, this must have been the previously voted candidate
           await prisma.candidate.update({
             where: { id: candidate.id },
             data: { votes: { decrement: 1 } },
           });
-          break;
+
+          await prisma.candidate.update({
+            where: { id: newCandidate.id },
+            data: { votes: { increment: 1 } },
+          });
+
+          return res.json(
+            Utils.Response.success(`Vote changed to ${newCandidate.name}`, 200)
+          );
         }
       }
+
+      // If somehow already voted but can't find previous candidate, fallback
+      return next(
+        Utils.Response.error(`Already voted for ${positionKey}`, 400)
+      );
     }
 
-    // Step 2: Increment vote of new candidate
+    // If no previous vote for this position
     await prisma.candidate.update({
       where: { id: newCandidate.id },
       data: { votes: { increment: 1 } },
     });
 
-    // Step 3: Update user vote string if they hadn't voted before
-    let newVotesString = user.votes;
-    if (user.votes[idx] === "0") {
-      const voteArr = user.votes.split("");
-      voteArr[idx] = "1";
-      newVotesString = voteArr.join("");
+    // Update user's votes string
+    const voteArr = user.votes.split("");
+    voteArr[idx] = "1";
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { votes: newVotesString },
-      });
-    }
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { votes: voteArr.join("") },
+    });
 
     return res.json(
-      Utils.Response.success(`Vote updated for ${positionKey}`, 200)
+      Utils.Response.success(`Vote cast for ${newCandidate.name}`, 200)
     );
   } catch (err) {
     console.error("Error updating vote:", err);
