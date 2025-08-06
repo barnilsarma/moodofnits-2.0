@@ -24,7 +24,6 @@ app
 app.use(`${Constants.System.ROOT}/`, Routers.Health);
 app.use(`${Constants.System.ROOT}/candidate`, Routers.Candidate);
 app.use(`${Constants.System.ROOT}/comments`, Routers.Comments);
-app.use(`${Constants.System.ROOT}/exitpoll`, Routers.ExitPoll);
 app.use(`${Constants.System.ROOT}/like`, Routers.Like);
 app.use(`${Constants.System.ROOT}/option`, Routers.Option);
 app.use(`${Constants.System.ROOT}/position`, Routers.Position);

@@ -1,7 +1,6 @@
 import Health from "./health";
 import Candidate from "./candidate";
 import Comments from "./comments";
-import ExitPoll from "./exitpoll";
 import Like from "./like";
 import Option from "./option";
 import Position from "./position";
@@ -12,7 +11,6 @@ export {
   Health,
   Candidate,
   Comments,
-  ExitPoll,
   Like,
   Option,
   Position,
